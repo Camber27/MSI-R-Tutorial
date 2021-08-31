@@ -117,8 +117,9 @@ image(data_proc, mz=104, colorscale=magma)
 
 ```
 
-```{r}
-whle image
+```{r image whole run}
+# intensity for all pixels in run
+image(data_proc)
 ```
 
 This image is signal for the entire processed dataset. By changing the parameters in the code specific m/z values can be used along with changing the color theme. Cardinal offers dark and light themes along with cividis, magma, inferno, and plasma for colorscales. An m/z image of the whole dataset is useful for quickly visualizing signal hotspots and trends without further analysis. Furthermore, the image generated can be used to estimate coordinates for particular areas of the slide. 
@@ -132,22 +133,27 @@ This code enables the user to chose coordinates from the previous m/z image of t
 # save features of data
 features <- features(data_proc)
 # select desired pixel range to form square arount region of interest
-pixels <- pixels(data, x>= 2250 & x<=3500, y>= 625 & y<=850)
+pixels <- pixels(data_proc, 
+                x>= 2250 & x<=3500,
+                y>= 625 & y<=850)
 # make object with features of selected area
-data_cut <- data[features,pixels]
+data_cut <- data_proc[features,pixels]
 ```
 
 Now when the smaller chunk is projected as an image it only includes the desired region. 
 
 ```{r image cut}
 # image of selected area
-image(data_cut)
+image(data_cut,
+      mz=104,
+      colorscale=magma)
 ```
 
 
 
 ```{r m/z image 2}
 # image any m/z value
+# simply change the mz= aparameter to target
 image(data_cut, mz=86.21196)
 ```
 
@@ -168,7 +174,8 @@ In the spatial shrunken centroid function there are four user changable paramete
 
 ```{r image ssc}
 # image results of ssc
-ssc <- image(data_proc_ssc, model=list(s=15))
+ssc <- image(data_proc_ssc, 
+             model=list(s=15))
 ssc
 ```
 
@@ -189,7 +196,9 @@ image(dhb52_processed_all_pca_n8, contrast.enhance="histogram", normalize.image=
 
 ```{r PCA}
 # PCA
+# ncomp parameter is number of principal components
 data_proc_pca <- PCA(data_proc, ncomp=4)
+# save object due to longer run time
 saveRDS(data_proc_pca, file="data_proc_pca_new.rds")
 ```
 
@@ -201,23 +210,6 @@ image(data_proc_pca, contrast.enhance="histogram", normalize.image="linear")
 ### Analysis of PCA
 
 The unsupervised method picked up on accidental overspray of DHB matrix into 5nm AuNP zone. All methods can be performed on a selected area of imaging data. For example, we can image a PCA run on only the tricaine side of this slide. 
-
-New Preprocessing
-
-```{r}
-#pre-processing
-data_proc <- data %>% 
-  #normalize spectra
-  normalize(method="tic") %>%
-  #select main peaks, those below SNR will be zero
-  peakPick(method="mad", SNR=5) %>% 
-  #align spectra to given peaks or mean spectra if left empty
-  peakAlign(tolerance=0.5, units="mz") %>% 
-  #remove low frequency peaks
-  peakFilter(freq.min=0.01, rm.zero=TRUE) %>%
-  #process
-  process()
-```
 
 
 

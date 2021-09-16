@@ -58,9 +58,15 @@ With the Cardinal package installed and an imaging dataset downloaded, we are re
 The defining feature of MSI is the spatial component of the data. In order to make m/z images, data first needs to be read into R and processed. 
 
 ```{r data path}
-# use your terminal or OS to find the file path of the .imzml file of your MSI data
-data_path_example <- "the/path/to/your/.imzml/imaging/data"
-data_path <- "D:\\Data Storage\\Converted IMZML Datasets\\KS_Zebrafish_2AuNP_5AuNP_DHB_20\\KS_Zebrafish_2AuNP_5AuNP_DHB_20.imzML"
+# use your terminal or OS to find the file path of the .imzml file of the MSI data from the downloaded github files 
+
+data_path_example <- "the/path/to/your/.imzml/imaging/data" 
+
+# Make sure the imzml and ibd file are in the same folder. Use the file path for the .imzml file. It ends with .imzml in the path.
+
+# Download the dataset from metaspace https://www.metaspace2020.eu/datasets?subm=e89830bd-ce18-11ea-96db-8faddc24c30c&organism=Danio%20rerio%20%28zebrafish%29 or use the preprocessed .rds file provided in the github repository and skip past creating it. 
+
+data_path <- "insert the path to the imzml downloaded from metaspace here" 
 ```
 Important note: depending on the OS of the workstation, different symbols are needed for file paths. In Windows the \ symbol is the default for outputting file paths, but R will read this as its own command. This is why a second \ is added manually. In UNIX based OS like Mac or Linux the native / file paths work 
 ```{r load data, warning=FALSE}
@@ -75,19 +81,22 @@ Now the object **data** is your MSI dataset loaded into R for further analysis. 
 Raw data can be analyzed but preprocessing is the standard for MSI experiments. This step reduces the computational resources and time required for analysis and can be tuned for specific needs. The parameters such as total ion count (tic) and root mean square (rms) are listed in Cardinal documentation and user changable. The most important parameter is the signal to noise ratio (SNR). This number dictates how much more intense a peak must be than the noise region to be considered a real peak. By increasing this number a smaller number of more intense peaks will be used for analysis. If a particular peak is desired, it is useful to make an m/z image and display its spectrum before and after preprocessing to verify this step retains the target. 
 
 ```{r}
-# preprocess datasets
-data_proc <- data %>% # %>% this is a pipe operator. It performs the following steps on "data" and saves the resulting object as "data_proc"
-  
-  #normalize the spectra
-  normalize(method="tic") %>%
-  #select main peaks, those below SNR will be zero
-  peakPick(method="mad", SNR=5) %>% 
-  #align spectra to given peaks or mean spectra if left empty
-  peakAlign(tolerance=0.5, units="mz") %>% 
-  #remove low frequency peaks
-  peakFilter(freq.min=0.01, rm.zero=TRUE) %>%
-  #process
-  process()
+# preprocess datasets 
+
+data_proc <- data %>% # %>% this is a pipe operator. It performs the following steps on "data" and saves the resulting object as "data_proc" 
+
+# note if you are skipping preprocessing and using the premade R object from github, you can run this code to load it into R. data_proc <- readRDS("path//to//downloaded//data_proc//file//from//github//.rds")
+
+  #normalize the spectra 
+  normalize(method="tic") %>% 
+  #select main peaks, those below SNR will be zero 
+  peakPick(method="mad", SNR=5) %>%  
+  #align spectra to given peaks or mean spectra if left empty 
+  peakAlign(tolerance=0.5, units="mz") %>%  
+  #remove low frequency peaks 
+  peakFilter(freq.min=0.01, rm.zero=TRUE) %>% 
+  #process 
+  process() 
 ```
 
 ### Target Confirmation
